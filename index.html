@@ -1,29 +1,88 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <!-- La escena de A-Frame -->
-    <a-scene>
+<head>
+  <meta charset="utf-8">
+  <title>Juego de la Vida con A-Frame</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene background="color: black"> 
+    <a-entity id="cells"></a-entity> <!-- Celdas vivas -->
 
-      <!-- Precargar la textura del césped -->
-      <a-assets>
-        <img id="grassTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
-      </a-assets>
+    <a-entity camera position="0 2 10"></a-entity> 
 
-      <!-- Cubo con animación -->
-      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" animation="property: position; to: -1 0.5 -7; loop: true; dur: 5000; dir: alternate;"></a-box>
+    <script>
+      const numRows = 10;
+      const numCols = 10;
+      const cellSize = 0.8; 
+      const spacing = 1.2; 
+      const cellsContainer = document.getElementById('cells');
 
-      <!-- Cilindro -->
-      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      // Inicializar el tablero
+      const board = [];
+      for (let row = 0; row < numRows; row++) {
+        board[row] = [];
+        for (let col = 0; col < numCols; col++) {
+          board[row][col] = Math.random() > 0.5 ? 1 : 0; // Estado inicial aleatorio
+        }
+      }
 
-      <!-- Plano como piso con textura de césped -->
-      <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" src="#grassTexture"></a-plane>
+      // Crear celdas
+      for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+          const cell = document.createElement('a-box');
+          cell.setAttribute('position', `${col * spacing - 4} ${row * spacing - 4} 0`); 
+        cell.setAttribute('width', cellSize);
+          cell.setAttribute('height', cellSize);
+          cell.setAttribute('depth', cellSize);
+          cell.setAttribute('color', board[row][col] === 1 ? 'blue' : 'white'); 
+          cellsContainer.appendChild(cell);
+        }
+      }
 
-      <!-- Cielo -->
-      <a-sky color="#ECECEC"></a-sky>
+      // Función para calcular el siguiente estado del tablero
+      function nextGeneration() {
+        const newBoard = [];
+        for (let row = 0; row < numRows; row++) {
+          newBoard[row] = [];
+          for (let col = 0; col < numCols; col++) {
+            const neighbors = countNeighbors(row, col);
+            if (board[row][col] === 1) {
+              newBoard[row][col] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+            } else {
+              newBoard[row][col] = (neighbors === 3) ? 1 : 0;
+            }
+          }
+        }
+        board.splice(0, board.length, ...newBoard);
 
-    </a-scene>
-  </body>
+        // Actualizar el color de las celdas
+        const cells = cellsContainer.querySelectorAll('a-box');
+        cells.forEach((cell, index) => {
+          const row = Math.floor(index / numCols);
+          const col = index % numCols;
+          cell.setAttribute('color', board[row][col] === 1 ? 'blue' : 'white'); 
+        });
+      }
+
+      // Función para contar vecinos vivos
+      function countNeighbors(row, col) {
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+          for (let j = -1; j <= 1; j++) {
+            const nRow = row + i;
+            const nCol = col + j;
+            if (nRow >= 0 && nRow < numRows && nCol >= 0 && nCol < numCols && !(i === 0 && j === 0)) {
+              count += board[nRow][nCol];
+            }
+          }
+        }
+        return count;
+      }
+
+      // Ciclo de vida del juego
+      setInterval(nextGeneration, 1000);
+    </script>
+  </a-scene>
+</body>
 </html>
