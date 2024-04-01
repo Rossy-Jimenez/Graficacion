@@ -9,7 +9,7 @@
   <a-scene background="color: black"> 
     <a-entity id="cells"></a-entity> <!-- Celdas vivas -->
 
-    <a-entity camera position="0 2 10"></a-entity> 
+    <a-entity camera position="0 2 20"></a-entity> 
 
     <script>
       const numRows = 10;
@@ -23,7 +23,7 @@
       for (let row = 0; row < numRows; row++) {
         board[row] = [];
         for (let col = 0; col < numCols; col++) {
-          board[row][col] = Math.random() > 0.5 ? 1 : 0; // Estado inicial aleatorio
+          board[row][col] = Math.random() > 0.6 ? 1 : 0; // Estado inicial aleatorio
         }
       }
 
